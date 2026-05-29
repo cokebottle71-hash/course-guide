@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대학 계열에 따른 선택 과목 안내</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --hum: #1a3a8f;   --hum-l: #e8eeff;  --hum-a: #4f78f7;
+    --soc: #14532d;   --soc-l: #e7f9ee;  --soc-a: #22c55e;
+    --nat: #78350f;   --nat-l: #fef3c7;  --nat-a: #f59e0b;
+    --eng: #3b0764;   --eng-l: #f3e8ff;  --eng-a: #a855f7;
+    --med: #7f1d1d;   --med-l: #ffe4e6;  --med-a: #f43f5e;
+    --art: #0c4a6e;   --art-l: #e0f2fe;  --art-a: #0ea5e9;
+    --bg: #f8fafc;
+    --text: #0f172a;
+    --sub: #64748b;
+    --border: #e2e8f0;
+    --white: #ffffff;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(0,0,0,.08);
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f2a5e 100%);
+    color: #fff;
+    padding: 56px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(79,120,247,.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    color: #93c5fd;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: .1em;
+    padding: 5px 14px; border-radius: 999px;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(26px, 5vw, 42px);
+    font-weight: 900; line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .hero h1 em { color: #60a5fa; font-style: normal; }
+  .hero p { font-size: 14px; color: #94a3b8; max-width: 540px; margin: 0 auto 32px; }
+  .hero-cats {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center;
+  }
+  .hero-tag {
+    padding: 6px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    border: 1px solid; cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+  }
+  .hero-tag:hover { transform: translateY(-2px); filter: brightness(1.15); }
+
+  /* ── NAV ── */
+  .sticky-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .sticky-nav::-webkit-scrollbar { height: 3px; }
+  .sticky-nav::-webkit-scrollbar-thumb { background: var(--border); }
+  .nav-inner { display: inline-flex; gap: 4px; padding: 10px 0; }
+  .nav-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    border: none; cursor: pointer; background: transparent;
+    color: var(--sub); transition: all .18s;
+    font-family: inherit;
+  }
+  .nav-btn:hover, .nav-btn.active { color: #fff; }
+  .nav-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── WRAPPER ── */
+  .wrapper { max-width: 960px; margin: 0 auto; padding: 40px 16px 80px; }
+
+  /* ── SECTION HEADER ── */
+  .cat-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 22px 28px; border-radius: var(--radius);
+    margin-bottom: 20px;
+    position: relative; overflow: hidden;
+  }
+  .cat-header::after {
+    content: attr(data-emoji);
+    position: absolute; right: 24px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 56px; opacity: .15;
+    line-height: 1;
+  }
+  .cat-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+    background: rgba(255,255,255,.2);
+  }
+  .cat-info h2 { font-size: 22px; font-weight: 800; color: #fff; }
+  .cat-info p { font-size: 13px; color: rgba(255,255,255,.7); margin-top: 2px; }
+
+  /* ── SUB-CATEGORY ── */
+  .sub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(0,0,0,.12); }
+
+  .card-head {
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-num {
+    width: 26px; height: 26px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; flex-shrink: 0;
+    color: #fff;
+  }
+  .card-head h3 { font-size: 14px; font-weight: 700; }
+
+  .course-table { width: 100%; border-collapse: collapse; }
+  .course-table th {
+    font-size: 11px; font-weight: 700;
+    padding: 7px 12px; text-align: left;
+    background: #f1f5f9; color: var(--sub);
+    letter-spacing: .04em;
+  }
+  .course-table td { font-size: 11.5px; padding: 7px 12px; vertical-align: top; border-top: 1px solid var(--border); }
+  .course-table tr:last-child td { border-bottom: none; }
+  .course-table .type-cell {
+    font-weight: 700; white-space: nowrap;
+    font-size: 11px; padding-right: 4px;
+  }
+  .course-table .sub-cell {
+    font-size: 10px; color: var(--sub);
+    white-space: nowrap; padding-right: 4px;
+  }
+  .course-table .content-cell { color: #334155; line-height: 1.5; }
+
+  .section-divider {
+    background: #f8fafc;
+    padding: 5px 12px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .08em; color: var(--sub);
+    border-top: 1px solid var(--border);
+  }
+
+  /* tags for common/suneung */
+  .common-box {
+    background: #f8fafc;
+    border-top: 1px solid var(--border);
+    padding: 10px 14px;
+  }
+  .common-label { font-size: 10px; font-weight: 700; color: var(--sub); margin-bottom: 4px; letter-spacing: .05em; }
+  .common-text { font-size: 10.5px; color: #475569; line-height: 1.6; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 32px 16px;
+    border-top: 1px solid var(--border);
+    color: var(--sub); font-size: 12px;
+  }
+
+  /* colors per cat */
+  .c-hum .cat-header { background: linear-gradient(135deg, var(--hum) 0%, #2563eb 100%); }
+  .c-hum .cat-header data-emoji { }
+  .c-hum .card-num { background: var(--hum-a); }
+  .c-hum .card-head { background: var(--hum-l); }
+  .c-hum .card-head h3 { color: var(--hum); }
+
+  .c-soc .cat-header { background: linear-gradient(135deg, var(--soc) 0%, #16a34a 100%); }
+  .c-soc .card-num { background: var(--soc-a); }
+  .c-soc .card-head { background: var(--soc-l); }
+  .c-soc .card-head h3 { color: var(--soc); }
+
+  .c-nat .cat-header { background: linear-gradient(135deg, var(--nat) 0%, #d97706 100%); }
+  .c-nat .card-num { background: var(--nat-a); }
+  .c-nat .card-head { background: var(--nat-l); }
+  .c-nat .card-head h3 { color: var(--nat); }
+
+  .c-eng .cat-header { background: linear-gradient(135deg, var(--eng) 0%, #7c3aed 100%); }
+  .c-eng .card-num { background: var(--eng-a); }
+  .c-eng .card-head { background: var(--eng-l); }
+  .c-eng .card-head h3 { color: var(--eng); }
+
+  .c-med .cat-header { background: linear-gradient(135deg, var(--med) 0%, #e11d48 100%); }
+  .c-med .card-num { background: var(--med-a); }
+  .c-med .card-head { background: var(--med-l); }
+  .c-med .card-head h3 { color: var(--med); }
+
+  .c-art .cat-header { background: linear-gradient(135deg, var(--art) 0%, #0284c7 100%); }
+  .c-art .card-num { background: var(--art-a); }
+  .c-art .card-head { background: var(--art-l); }
+  .c-art .card-head h3 { color: var(--art); }
+
+  @media (max-width: 600px) {
+    .sub-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">2023 학과(전공) 분류 자료집 기준</div>
+  <h1>대학 계열에 따른<br><em>선택 과목</em> 안내</h1>
+  <p>계열별 권장 선택 과목을 제시할 때 국어와 영어 교과의 선택 과목은 도구 교과(모든 학생이 배우는 교과)로 제외하였습니다.</p>
+  <div class="hero-cats">
+    <a href="#hum" class="hero-tag" style="color:#93c5fd;border-color:rgba(147,197,253,.4);background:rgba(147,197,253,.1)">📖 인문 계열</a>
+    <a href="#soc" class="hero-tag" style="color:#86efac;border-color:rgba(134,239,172,.4);background:rgba(134,239,172,.1)">🏛 사회 계열</a>
+    <a href="#nat" class="hero-tag" style="color:#fcd34d;border-color:rgba(252,211,77,.4);background:rgba(252,211,77,.1)">🌿 자연 계열</a>
+    <a href="#eng" class="hero-tag" style="color:#d8b4fe;border-color:rgba(216,180,254,.4);background:rgba(216,180,254,.1)">⚙️ 공학 계열</a>
+    <a href="#med" class="hero-tag" style="color:#fda4af;border-color:rgba(253,164,175,.4);background:rgba(253,164,175,.1)">🏥 의약 계열</a>
+    <a href="#art" class="hero-tag" style="color:#7dd3fc;border-color:rgba(125,211,252,.4);background:rgba(125,211,252,.1)">🎨 예체능 계열</a>
+  </div>
+</div>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <button class="nav-btn" onclick="scrollTo('hum',this)" style="--ac:#4f78f7">
+      <span class="nav-dot" style="background:#4f78f7"></span>인문
+    </button>
+    <button class="nav-btn" onclick="scrollTo('soc',this)" style="--ac:#22c55e">
+      <span class="nav-dot" style="background:#22c55e"></span>사회
+    </button>
+    <button class="nav-btn" onclick="scrollTo('nat',this)" style="--ac:#f59e0b">
+      <span class="nav-dot" style="background:#f59e0b"></span>자연
+    </button>
+    <button class="nav-btn" onclick="scrollTo('eng',this)" style="--ac:#a855f7">
+      <span class="nav-dot" style="background:#a855f7"></span>공학
+    </button>
+    <button class="nav-btn" onclick="scrollTo('med',this)" style="--ac:#f43f5e">
+      <span class="nav-dot" style="background:#f43f5e"></span>의약
+    </button>
+    <button class="nav-btn" onclick="scrollTo('art',this)" style="--ac:#0ea5e9">
+      <span class="nav-dot" style="background:#0ea5e9"></span>예체능
+    </button>
+  </div>
+</nav>
+
+<div class="wrapper">
+
+<!-- ① 인문 -->
+<section id="hum" class="c-hum">
+  <div class="cat-header" data-emoji="📖">
+    <div class="cat-icon">📖</div>
+    <div class="cat-info"><h2>① 인문 계열</h2><p>어문·문학 / 인문과학</p></div>
+  </div>
+  <div class="sub-grid">
+    <!-- 1-1 -->
+    <div class="card">
+      <div class="card-head"><span class="card-num">1</span><h3>(1) 어문·문학 권장 선택 과목</h3></div>
+      <div class="common-box">
+        <div class="common-label">▸ 공통 과목</div>
+        <div class="common-text">공통국어1·2, 공통수학1·2, 기본수학1·2, 공통영어1·2, 기본영어1·2, 한국사1·2, 통합사회1·2, 통합과학1·2, 과학탐구실험1·2</div>
+      </div>
+      <div class="common-box">
+        <div class="common-label">▸ 수능 지정 과목</div>
+        <div class="common-text">화법과 언어, 독서와 작문, 문학, 대수, 미적분I, 확률과 통계, 영어, 영어I, 한국사, 통합사회, 통합과학, 성공적인 직업 생활(직업 탐구)</div>
+      </div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td class="type-cell"></td><td class="sub-cell">기초</td><td class="content-cell">세계시민과 지리, 세계사, 사회와 문화</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악, 미술, 연극</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">제2외국어</td></tr>
+        <div class="section-divider"></div>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">동아시아 역사 기행, 윤리와 사상, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악 감상과 비평, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">제2외국어 회화, 심화 제2외국어, 한문 고전 읽기, 인간과 철학</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">역사로 탐구하는 현대 세계, 사회문제 탐구, 윤리문제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">제2외국어 문화, 언어생활과 한자</td></tr>
+      </table>
+    </div>
+    <!-- 1-2 -->
+    <div class="card">
+      <div class="card-head"><span class="card-num">2</span><h3>(2) 인문과학 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">세계시민과 지리, 사회와 문화, 현대사회와 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악, 미술, 연극</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">제2외국어, 한문</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">동아시아 역사 기행, 법과 사회, 윤리와 사상, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악 감상과 비평, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">제2외국어 회화, 심화 제2외국어, 한문 고전 읽기, 논리와 사고, 인간과 철학, 삶과 종교</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">역사로 탐구하는 현대 세계, 사회문제 탐구, 윤리문제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술과 매체</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">제2외국어 문화, 언어생활과 한자 논술</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ② 사회 -->
+<section id="soc" class="c-soc">
+  <div class="cat-header" data-emoji="🏛">
+    <div class="cat-icon">🏛</div>
+    <div class="cat-info"><h2>② 사회 계열</h2><p>경영·경제 / 법학·행정 / 사회과학</p></div>
+  </div>
+  <div class="sub-grid">
+    <div class="card">
+      <div class="card-head"><span class="card-num">1</span><h3>(1) 경영·경제 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">사회와 문화</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">제2외국어</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">기하, 미적분II, 경제 수학</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">정치, 법과 사회, 경제, 국제 관계의 이해</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">제2외국어 회화</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">실용 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">사회문제 탐구, 금융과 경제생활, 기후변화와 지속가능한 세계</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">제2외국어 문화, 인간과 경제활동</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">2</span><h3>(2) 법학·행정 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">사회와 문화, 현대사회와 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보·한문</td><td class="content-cell">정보, 한문</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">정치, 법과 사회, 경제, 인문학과 윤리, 국제 관계의 이해</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">인간과 철학, 인간과 심리</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">실용 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">여행지리, 사회문제 탐구, 금융과 경제생활, 윤리문제 탐구, 기후변화와 지속가능한 세계</td></tr>
+        <tr><td></td><td class="sub-cell">교양·한문</td><td class="content-cell">지식 재산 일반, 언어생활과 한자 논술</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">3</span><h3>(3) 사회과학 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">세계시민과 지리, 세계사, 사회와 문화, 현대사회와 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보·한문</td><td class="content-cell">정보, 기술·가정, 한문</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">한국지리 탐구, 도시의 미래 탐구, 동아시아 역사 기행, 정치, 법과 사회, 경제, 윤리와 사상, 인문학과 윤리, 국제 관계의 이해</td></tr>
+        <tr><td></td><td class="sub-cell">교양·한문</td><td class="content-cell">한문 고전 읽기, 논리와 사고, 인간과 철학, 인간과 심리, 삶과 종교</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">여행지리, 역사로 탐구하는 현대 세계, 사회문제 탐구, 금융과 경제생활, 윤리문제 탐구, 기후변화와 지속가능한 세계</td></tr>
+        <tr><td></td><td class="sub-cell">교양·한문</td><td class="content-cell">언어생활과 한자, 인간과 경제활동, 논술</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ③ 자연 -->
+<section id="nat" class="c-nat">
+  <div class="cat-header" data-emoji="🌿">
+    <div class="cat-icon">🌿</div>
+    <div class="cat-info"><h2>③ 자연 계열</h2><p>농림·수산 / 생물·화학·환경 / 생활과학 / 수학·물리·천문·지리</p></div>
+  </div>
+  <div class="sub-grid">
+    <div class="card">
+      <div class="card-head"><span class="card-num">1</span><h3>(1) 농림·수산 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 생명과학, 지구과학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">미적분II</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">화학 반응의 세계, 세포와 물질대사, 생물의 유전</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">데이터 과학</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">기후변화와 지속가능한 세계, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">2</span><h3>(2) 생물·화학·환경 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 생명과학, 지구과학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">미적분II</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">화학 반응의 세계, 세포와 물질대사, 생물의 유전, 지구시스템과학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">데이터 과학, 보건</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">기후변화와 지속가능한 세계, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">3</span><h3>(3) 생활과학 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 생명과학, 지구과학, 사회와 문화, 현대사회와 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악, 미술</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">미적분II</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">정치, 법과 사회, 경제, 인문학과 윤리, 화학 반응의 세계, 세포와 물질대사, 생물의 유전</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술 창작, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/교양</td><td class="content-cell">생활과학 탐구, 인간과 철학, 인간과 심리, 삶과 종교</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">사회문제 탐구, 금융과 경제생활, 윤리문제 탐구, 기후변화와 지속가능한 세계, 과학의 역사와 문화, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술과 매체</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반, 생애 설계와 자립, 아동발달과 부모, 인간과 경제활동</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">4</span><h3>(4) 수학·물리·천문·지리 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 생명과학, 지구과학, 세계시민과 지리</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">기하, 미적분II, 경제 수학, 인공지능 수학</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">역학과 에너지, 양자, 물질과 에너지, 지구시스템과학, 행성우주과학, 한국지리 탐구, 도시의 미래 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">인공지능 기초, 데이터 과학</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">실용 통계, 수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">기후변화와 환경생태, 융합과학 탐구, 여행지리, 기후변화와 지속가능한 세계</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">소프트웨어와 생활</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ④ 공학 -->
+<section id="eng" class="c-eng">
+  <div class="cat-header" data-emoji="⚙️">
+    <div class="cat-icon">⚙️</div>
+    <div class="cat-info"><h2>④ 공학 계열</h2><p>건축 / 토목·도시 / 기계·금속 / 전기·전자 / 정밀·에너지 / 소재·재료·화공 / 컴퓨터·통신</p></div>
+  </div>
+  <div class="sub-grid">
+    <div class="card">
+      <div class="card-head"><span class="card-num">1</span><h3>(1) 건축 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 지구과학</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">기하, 미적분II, 인공지능 수학</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">한국지리 탐구, 도시의 미래 탐구, 역학과 에너지, 전자기와 양자, 물질과 에너지, 지구시스템과학</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술 창작, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/교양</td><td class="content-cell">데이터 과학, 인간과 심리</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">수학과 문화, 수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">여행지리, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술과 매체</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">창의 공학 설계, 지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">2</span><h3>(2) 토목·도시 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 지구과학</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">기하, 미적분II, 인공지능 수학</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">한국지리 탐구, 도시의 미래 탐구, 역학과 에너지, 전자기와 양자, 물질과 에너지, 지구시스템과학</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술 창작, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/교양</td><td class="content-cell">데이터 과학, 인간과 심리</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">수학과 문화, 수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">여행지리, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">창의 공학 설계, 지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">3</span><h3>(3) 기계·금속 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 지구과학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">기하, 미적분II, 인공지능 수학</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">도시의 미래 탐구, 역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계, 지구시스템과학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/교양</td><td class="content-cell">로봇과 공학세계, 인공지능 기초, 데이터 과학, 논리와 사고</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">창의 공학 설계, 지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">4</span><h3>(4) 전기·전자 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 지구과학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">기하, 미적분II, 인공지능 수학</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/교양</td><td class="content-cell">로봇과 공학세계, 생활과학 탐구, 인공지능 기초, 데이터 과학</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">창의 공학 설계, 지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">5</span><h3>(5) 정밀·에너지 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 지구과학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">기하, 미적분II, 인공지능 수학</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">도시의 미래 탐구, 역학과 에너지, 전자기와 양자, 화학 반응의 세계, 지구시스템과학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/교양</td><td class="content-cell">로봇과 공학세계, 생활과학 탐구, 인공지능 기초, 데이터 과학</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">기후변화와 지속가능한 세계, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">창의 공학 설계, 지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">6</span><h3>(6) 소재·재료·화공 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 지구과학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보, 생태와 환경</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">기하, 미적분II, 인공지능 수학</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">역학과 에너지, 전자기와 양자, 물질과 에너지, 화학 반응의 세계</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/교양</td><td class="content-cell">로봇과 공학세계, 생활과학 탐구, 데이터 과학</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">창의 공학 설계, 지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">7</span><h3>(7) 컴퓨터·통신 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/정보</td><td class="content-cell">기술·가정, 정보</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">기하, 미적분II, 인공지능 수학</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">전자기와 양자</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/교양</td><td class="content-cell">로봇과 공학세계, 생활과학 탐구, 인공지능 기초, 데이터 과학, 논리와 사고</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">실용 통계, 수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">창의 공학 설계, 지식 재산 일반</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ⑤ 의약 -->
+<section id="med" class="c-med">
+  <div class="cat-header" data-emoji="🏥">
+    <div class="cat-icon">🏥</div>
+    <div class="cat-info"><h2>⑤ 의약 계열</h2><p>의료 / 간호 / 약학 / 치료보건</p></div>
+  </div>
+  <div class="sub-grid">
+    <div class="card">
+      <div class="card-head"><span class="card-num">1</span><h3>(1) 의료 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 생명과학, 지구과학, 현대사회와 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">한문, 중국어</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">미적분II</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">화학 반응의 세계, 세포와 물질대사, 생물의 유전, 법과 사회, 윤리와 사상, 인문학과 윤리, 동아시아 역사 기행</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정/교양</td><td class="content-cell">생활과학 탐구, 중국어 회화, 한문 고전 읽기, 인간과 심리, 보건</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">사회문제 탐구, 윤리문제 탐구, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">제2외국어·한문</td><td class="content-cell">중국 문화, 언어생활과 한자</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">2</span><h3>(2) 간호 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">화학, 생명과학, 현대사회와 윤리</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">미적분II</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">화학 반응의 세계, 세포와 물질대사, 생물의 유전, 법과 사회, 윤리와 사상, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">생활과학 탐구, 인간과 심리, 보건</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">사회문제 탐구, 윤리문제 탐구, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">3</span><h3>(3) 약학 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 생명과학, 현대사회와 윤리</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">미적분II</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 법과 사회, 윤리와 사상, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">생활과학 탐구, 인간과 심리, 보건</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">사회문제 탐구, 윤리문제 탐구, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">4</span><h3>(4) 치료보건 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">대수, 미적분I, 확률과 통계</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물리학, 화학, 생명과학, 현대사회와 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정</td><td class="content-cell">기술·가정</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">미적분II</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">물질과 에너지, 화학 반응의 세계, 세포와 물질대사, 생물의 유전, 법과 사회, 윤리와 사상, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">생활과학 탐구, 인간과 심리, 보건</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">기초</td><td class="content-cell">언어생활과 탐구, 수학과제 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">사회문제 탐구, 윤리문제 탐구, 기후변화와 환경생태, 융합과학 탐구</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ⑥ 예체능 -->
+<section id="art" class="c-art">
+  <div class="cat-header" data-emoji="🎨">
+    <div class="cat-icon">🎨</div>
+    <div class="cat-info"><h2>⑥ 예체능 계열</h2><p>디자인 / 응용예술 / 무용·체육 / 미술·조형 / 연극·영화 / 음악</p></div>
+  </div>
+  <div class="sub-grid">
+    <div class="card">
+      <div class="card-head"><span class="card-num">1</span><h3>(1) 디자인 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">세계시민과 지리, 사회와 문화</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">법과 사회, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술 창작, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">인간과 철학, 인간과 심리</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술과 매체</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">2</span><h3>(2) 응용예술 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">세계시민과 지리, 사회와 문화</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">법과 사회, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술 창작, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">인간과 철학, 인간과 심리</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">여행지리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술과 매체</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">3</span><h3>(3) 무용·체육 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">세계시민과 지리, 사회와 문화</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">체육1, 체육2</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">정치, 법과 사회, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">운동과 건강, 스포츠 문화, 스포츠 과학</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">인간과 철학, 인간과 심리</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">스포츠 생활1, 스포츠 생활2</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">4</span><h3>(4) 미술·조형 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">세계시민과 지리, 사회와 문화</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">법과 사회, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술 창작, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">인간과 철학, 인간과 심리</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">미술과 매체</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">5</span><h3>(5) 연극·영화 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">세계시민과 지리, 사회와 문화</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악, 미술, 연극</td></tr>
+        <tr><td></td><td class="sub-cell">기술·가정</td><td class="content-cell">기술·가정</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">법과 사회, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악 연주와 창작, 음악 감상과 비평, 미술 창작, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">인간과 철학, 인간과 심리</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">여행지리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악과 미디어, 미술과 매체</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="card-num">6</span><h3>(6) 음악 권장 선택 과목</h3></div>
+      <table class="course-table">
+        <tr><th colspan="3">일반 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">세계시민과 지리, 사회와 문화</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악, 미술, 연극</td></tr>
+        <tr><th colspan="3">진로 선택</th></tr>
+        <tr><td></td><td class="sub-cell">탐구</td><td class="content-cell">법과 사회, 인문학과 윤리</td></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악 연주와 창작, 음악 감상과 비평, 미술 창작, 미술 감상과 비평</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">인간과 철학, 인간과 심리</td></tr>
+        <tr><th colspan="3">융합 선택</th></tr>
+        <tr><td></td><td class="sub-cell">체육·예술</td><td class="content-cell">음악과 미디어</td></tr>
+        <tr><td></td><td class="sub-cell">교양</td><td class="content-cell">지식 재산 일반</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrapper -->
+
+<footer class="footer">
+  <p>출처: 한국교육개발원 <strong>「2023 학과(전공) 분류 자료집」</strong></p>
+  <p style="margin-top:6px;">국어·영어 교과 선택 과목(도구 교과)은 계열별 권장 목록에서 제외됨</p>
+</footer>
+
+<script>
+  function scrollTo(id, btn) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      b.style.background = 'transparent';
+      b.style.color = 'var(--sub)';
+    });
+    btn.style.background = btn.style.getPropertyValue('--ac') || '#4f78f7';
+    btn.style.color = '#fff';
+  }
+
+  // Auto highlight nav on scroll
+  const sections = ['hum','soc','nat','eng','med','art'];
+  const btns = document.querySelectorAll('.nav-btn');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && window.scrollY >= el.offsetTop - 100) cur = id;
+    });
+    btns.forEach((b, i) => {
+      const isActive = sections[i] === cur;
+      b.style.background = isActive ? (b.style.getPropertyValue('--ac') || '#4f78f7') : 'transparent';
+      b.style.color = isActive ? '#fff' : 'var(--sub)';
+    });
+  });
+</script>
+</body>
+</html>
